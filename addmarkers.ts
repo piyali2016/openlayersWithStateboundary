@@ -21,8 +21,10 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     this.initializeMap();
+     this.map.once('postrender', () => {
     this.addIndiaBoundary();
     this.addMarkers();
+  });
   }
 
   initializeMap() {
@@ -95,9 +97,9 @@ export class MapComponent implements OnInit {
 
       const markerStyle = new Style({
         image: new Circle({
-          radius: 6,
-          fill: new Fill({ color: 'red' }),
-          stroke: new Stroke({ color: 'white', width: 2 })
+          radius: 7,
+          fill: new Fill({ color: 'rgba(255, 0, 0, 0.8)' }),
+          stroke: new Stroke({ color: 'rgba(0, 0, 0, 0.8)', width: 1 })
         }),
         text: new Text({
           text: marker.name,
