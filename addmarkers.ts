@@ -1,10 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { Map, View } from 'ol';
+import TileLayer from 'ol/layer/Tile';
+import OSM from 'ol/source/OSM';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import Icon from 'ol/style/Icon';
-import Feature from 'ol/Feature';
-import Point from 'ol/geom/Point';
+import GeoJSON from 'ol/format/GeoJSON';
+import Style from 'ol/style/Style';
+import Fill from 'ol/style/Fill';
+import Stroke from 'ol/style/Stroke';
+import Text from 'ol/style/Text';
+import { Feature } from 'ol';
 
 @Component({
   selector: 'app-map',
@@ -16,65 +21,106 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     this.initializeMap();
+    this.addIndiaBoundary();
     this.addMarkers();
   }
 
   initializeMap() {
-    // Map initialization code here...
+    this.map = new Map({
+      target: 'map',
+      layers: [
+        new TileLayer({
+          source: new OSM()
+        })
+      ],
+      view: new View({
+        center: [0, 0],
+        zoom: 2
+      })
+    });
   }
-  
- loadGeoJSON(): void {
-  this.http.get('assets/india.geojson').subscribe((data: any) => {
-    const geojson = data;
 
-    // Add the vector layer for state boundaries
+  addIndiaBoundary() {
+    const indiaGeoJsonUrl = 'assets/india.geojson';
+
     const vectorSource = new VectorSource({
-      format: new GeoJSON(),
-      features: new GeoJSON().readFeatures(geojson)
+      url: indiaGeoJsonUrl,
+      format: new GeoJSON()
     });
 
     const vectorLayer = new VectorLayer({
       source: vectorSource,
-      style: this.getStyleFunction()
+      style: new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.5)',
+          width: 1
+        }),
+        fill: new Fill({
+          color: 'rgba(255, 255, 255, 0.1)'
+        })
+      })
     });
 
     this.map.addLayer(vectorLayer);
+  }
 
-    // Add markers using the loaded data
-    this.addMarkers(geojson);
-  });
-}
+  addMarkers() {
+    const markerData = [
+      {
+        name: 'Marker 1',
+        latitude: 28.6139,
+        longitude: 77.2090,
+        description: 'This is Marker 1'
+      },
+      {
+        name: 'Marker 2',
+        latitude: 12.9716,
+        longitude: 77.5946,
+        description: 'This is Marker 2'
+      },
+      {
+        name: 'Marker 3',
+        latitude: 18.5204,
+        longitude: 73.8567,
+        description: 'This is Marker 3'
+      }
+    ];
 
-addMarkers(geojson: any) {
-  const vectorSource = new VectorSource();
-  const iconStyle = new Style({
-    image: new Icon({
-      src: 'assets/marker.png', // Replace with the path to your marker image
-      anchor: [0.5, 1] // Adjust the anchor point if needed
-    })
-  });
+    const vectorSource = new VectorSource();
 
-  // Iterate over the features in the GeoJSON data
-  geojson.features.forEach((feature: any) => {
-    // Extract the coordinates from the feature properties or geometry
-    const coordinates = feature.geometry.coordinates;
+    markerData.forEach(marker => {
+      const markerFeature = new Feature({
+        geometry: new Point([marker.longitude, marker.latitude])
+      });
 
-    // Create the marker feature
-    const markerFeature = new Feature({
-      geometry: new Point(coordinates)
+      const markerStyle = new Style({
+        image: new Circle({
+          radius: 6,
+          fill: new Fill({ color: 'red' }),
+          stroke: new Stroke({ color: 'white', width: 2 })
+        }),
+        text: new Text({
+          text: marker.name,
+          font: '12px Arial',
+          offsetY: -15,
+          fill: new Fill({ color: 'black' })
+        })
+      });
+
+      markerFeature.setStyle(markerStyle);
+      vectorSource.addFeature(markerFeature);
+
+      markerFeature.on('click', (event) => {
+        const selectedMarker = event.target;
+        console.log('Clicked Marker:', selectedMarker.getProperties());
+        // Perform any actions or display information related to the clicked marker
+      });
     });
 
-    // Set the style for the marker feature
-    markerFeature.setStyle(iconStyle);
-
-    // Add the marker feature to the vector source
-    this.vectorSource.addFeature(markerFeature);
-  });
-   const vectorLayer = new VectorLayer({
+    const vectorLayer = new VectorLayer({
       source: vectorSource
     });
 
     this.map.addLayer(vectorLayer);
-}
-
+  }
 }
