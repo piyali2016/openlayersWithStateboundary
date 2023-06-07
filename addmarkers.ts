@@ -69,6 +69,11 @@ addMarkers(geojson: any) {
     // Add the marker feature to the vector source
     this.vectorSource.addFeature(markerFeature);
   });
+   const vectorLayer = new VectorLayer({
+      source: vectorSource
+    });
+
+    this.map.addLayer(vectorLayer);
 }
 
 }
