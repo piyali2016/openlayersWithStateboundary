@@ -110,17 +110,19 @@ export class MapComponent implements OnInit {
       markerFeature.setStyle(markerStyle);
       vectorSource.addFeature(markerFeature);
 
-      markerFeature.on('click', (event) => {
-        const selectedMarker = event.target;
-        console.log('Clicked Marker:', selectedMarker.getProperties());
+    const markerElement = document.createElement('div');
+      markerElement.className = 'marker';
+      markerElement.addEventListener('click', () => {
+        console.log('Clicked Marker:', marker);
         // Perform any actions or display information related to the clicked marker
       });
-    });
 
-    const vectorLayer = new VectorLayer({
-      source: vectorSource
-    });
+      const markerOverlay = new Overlay({
+        element: markerElement,
+        position: [marker.longitude, marker.latitude],
+        positioning: 'center-center'
+      });
 
-    this.map.addLayer(vectorLayer);
+      this.map.addOverlay(markerOverlay);
   }
 }
