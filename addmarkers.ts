@@ -46,6 +46,7 @@ export class MapComponent implements OnInit {
 }
 
 addMarkers(geojson: any) {
+  const vectorSource = new VectorSource();
   const iconStyle = new Style({
     image: new Icon({
       src: 'assets/marker.png', // Replace with the path to your marker image
