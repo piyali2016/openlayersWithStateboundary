@@ -22,26 +22,53 @@ export class MapComponent implements OnInit {
   initializeMap() {
     // Map initialization code here...
   }
+  
+ loadGeoJSON(): void {
+  this.http.get('assets/india.geojson').subscribe((data: any) => {
+    const geojson = data;
 
-  addMarkers() {
-    const iconStyle = new Icon({
-      src: 'assets/marker.png', // Replace with the path to your marker image
-      anchor: [0.5, 1] // Adjust the anchor point if needed
-    });
-
-    const markerFeature = new Feature({
-      geometry: new Point([longitude, latitude]) // Replace with the coordinates of your marker
-    });
-    markerFeature.setStyle(iconStyle);
-
+    // Add the vector layer for state boundaries
     const vectorSource = new VectorSource({
-      features: [markerFeature]
+      format: new GeoJSON(),
+      features: new GeoJSON().readFeatures(geojson)
     });
 
     const vectorLayer = new VectorLayer({
-      source: vectorSource
+      source: vectorSource,
+      style: this.getStyleFunction()
     });
 
     this.map.addLayer(vectorLayer);
-  }
+
+    // Add markers using the loaded data
+    this.addMarkers(geojson);
+  });
+}
+
+addMarkers(geojson: any) {
+  const iconStyle = new Style({
+    image: new Icon({
+      src: 'assets/marker.png', // Replace with the path to your marker image
+      anchor: [0.5, 1] // Adjust the anchor point if needed
+    })
+  });
+
+  // Iterate over the features in the GeoJSON data
+  geojson.features.forEach((feature: any) => {
+    // Extract the coordinates from the feature properties or geometry
+    const coordinates = feature.geometry.coordinates;
+
+    // Create the marker feature
+    const markerFeature = new Feature({
+      geometry: new Point(coordinates)
+    });
+
+    // Set the style for the marker feature
+    markerFeature.setStyle(iconStyle);
+
+    // Add the marker feature to the vector source
+    this.vectorSource.addFeature(markerFeature);
+  });
+}
+
 }
