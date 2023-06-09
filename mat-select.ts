@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 @Component({
@@ -11,18 +11,26 @@ export class MultiSelectComponent {
   @Input() options: { label: string, value: string }[];
   selectedOptions = new FormControl();
 
-  displaySelectedText(selectedValues: string[]): string {
-    if (selectedValues && selectedValues.length) {
-      if (selectedValues.length === 1 && selectedValues[0] === 'all') {
-        return 'ALL';
-      }
-      return selectedValues.length + ' options selected';
-    }
-    return '';
-  }
+  @ViewChild('select') selectElementRef!: ElementRef;
 
   ngOnInit() {
     // Pre-select "All" option initially
     this.selectedOptions.setValue(['all']);
+    this.updateDisplayText();
+  }
+
+  onSelectionChange() {
+    this.updateDisplayText();
+  }
+
+  updateDisplayText() {
+    const selectElement = this.selectElementRef.nativeElement as HTMLSelectElement;
+    const allOption = selectElement.querySelector('option[value="all"]');
+
+    if (allOption && allOption.selected) {
+      allOption.textContent = 'ALL';
+    } else if (allOption) {
+      allOption.textContent = 'All';
+    }
   }
 }
