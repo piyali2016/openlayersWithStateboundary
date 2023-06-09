@@ -1,7 +1,7 @@
 <mat-form-field>
-  <mat-label>{{ label }}</mat-label>
-  <mat-select [formControl]="selectedOptions" [multiple]="true" (selectionChange)="onSelectionChange()">
-    <mat-option value="all">All</mat-option>
+  <mat-label>{{ getSelectedLabel() }}</mat-label>
+  <mat-select [formControl]="selectedOptions" [multiple]="true" (selectionChange)="onSelectionChange()" (opened)="onDropdownOpened()">
+    <mat-option [value]="0">All</mat-option>
     <mat-option *ngFor="let option of options" [value]="option.value">
       {{ option.label }}
     </mat-option>
