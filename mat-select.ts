@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 @Component({
@@ -6,31 +6,38 @@ import { FormControl } from '@angular/forms';
   templateUrl: './multi-select.component.html',
   styleUrls: ['./multi-select.component.css']
 })
-export class MultiSelectComponent {
+export class MultiSelectComponent implements OnInit {
   @Input() label: string;
   @Input() options: { label: string, value: string }[];
   selectedOptions = new FormControl();
 
-  @ViewChild('select') selectElementRef!: ElementRef;
-
   ngOnInit() {
     // Pre-select "All" option initially
-    this.selectedOptions.setValue(['all']);
-    this.updateDisplayText();
+    this.selectedOptions.setValue([0]);
   }
 
   onSelectionChange() {
-    this.updateDisplayText();
+    const allSelected = this.selectedOptions.value.includes(0);
+    if (allSelected) {
+      this.selectedOptions.setValue([0, ...this.selectedOptions.value.filter(value => value !== 0)]);
+    }
   }
 
-  updateDisplayText() {
-    const selectElement = this.selectElementRef.nativeElement as HTMLSelectElement;
-    const allOption = selectElement.querySelector('option[value="all"]');
+  onDropdownOpened() {
+    const allSelected = this.selectedOptions.value.includes(0);
+    if (allSelected) {
+      setTimeout(() => {
+        this.selectedOptions.setValue([...this.options.map(option => option.value)]);
+      });
+    }
+  }
 
-    if (allOption && allOption.selected) {
-      allOption.textContent = 'ALL';
-    } else if (allOption) {
-      allOption.textContent = 'All';
+  getSelectedLabel(): string {
+    const allSelected = this.selectedOptions.value.includes(0);
+    if (allSelected) {
+      return 'All';
+    } else {
+      return this.selectedOptions.value.length + ' options selected';
     }
   }
 }
